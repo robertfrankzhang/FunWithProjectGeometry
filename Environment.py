@@ -94,6 +94,58 @@ class Environment:
             startX += traverseX
             startY += traverseY
             startZ += traverseZ
+
+    def createRandomFractal(self,startX,startY,startZ,minTraverseDistance,maxTraverseDistance,maxLeaves,depth,decay=0.5):
+        numLeaves = random.randint(1,maxLeaves)
+        savedLeaveEnds = np.array([])
+        self.createPoint(startX,startY,startZ)
+        for i in range(numLeaves):
+            traverseX = random.randint(-50,50)
+            traverseY = random.randint(-50,50)
+            traverseZ = random.randint(1,50)
+
+            norm = math.pow(math.pow(traverseX,2)+math.pow(traverseY,2)+math.pow(traverseZ,2),0.5)
+            if norm == 0:
+                norm = 1
+            traverseDistance = random.randint(minTraverseDistance,maxTraverseDistance)
+            traverseX *= traverseDistance/norm
+            traverseY *= traverseDistance/norm
+            traverseZ *= traverseDistance/norm
+            self.createLine(startX,startY,startZ,startX+traverseX,startY+traverseY,startZ+traverseZ)
+            savedLeaveEnds = np.append(savedLeaveEnds,np.array([startX+traverseX,startY+traverseY,startZ+traverseZ]))
+        if depth == 1:
+            return
+        else:
+            for i in range(int(savedLeaveEnds.size/3)):
+                self.createRandomFractal(savedLeaveEnds[3*i],savedLeaveEnds[3*i+1],savedLeaveEnds[3*i+2],int(decay*minTraverseDistance),int(decay*maxTraverseDistance),maxLeaves,depth-1)
+
+    def createCubeFractal(self,centerX,centerY,centerZ,maxSideLength,maxLeaves,depth,decay = 0.5):
+        numLeaves = random.randint(1,maxLeaves)
+        SL = int(random.random()*maxSideLength)
+        self.createCube(centerX,centerY,centerZ,SL)
+        if maxLeaves > 8:
+            maxLeaves = 8
+        choices = np.random.choice(8,maxLeaves)
+        if depth == 0:
+            return
+        if 0 in choices:
+            self.createCubeFractal(centerX-SL/2,centerY-SL/2,centerZ-SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 1 in choices:
+            self.createCubeFractal(centerX-SL/2,centerY-SL/2,centerZ+SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 2 in choices:
+            self.createCubeFractal(centerX-SL/2,centerY+SL/2,centerZ-SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 3 in choices:
+            self.createCubeFractal(centerX-SL/2,centerY+SL/2,centerZ+SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 4 in choices:
+            self.createCubeFractal(centerX+SL/2,centerY-SL/2,centerZ-SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 5 in choices:
+            self.createCubeFractal(centerX+SL/2,centerY-SL/2,centerZ+SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 6 in choices:
+            self.createCubeFractal(centerX+SL/2,centerY+SL/2,centerZ-SL/2,decay*maxSideLength,maxLeaves,depth-1)
+        if 7 in choices:
+            self.createCubeFractal(centerX+SL/2,centerY+SL/2,centerZ+SL/2,decay*maxSideLength,maxLeaves,depth-1)
+            
+        
             
     def comparePoints(self,p1,p2):
         if (p1.size != p2.size):
